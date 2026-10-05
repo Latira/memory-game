@@ -9,7 +9,24 @@ function createElement(tagName, className, textContent) {
     return element;
 }
 
+const cardIcons = ['🦊', '🐰', '🦁', '🐻', '🐼', '🐨', '🐸', '🐙']
+let cardsData = [];
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function prepareCards() {
+    const doubleCards = [...cardIcons, ...cardIcons];
+    cardsData = shuffle(doubleCards);
+}
+
 function initApp() {
+    prepareCards();
         // Header
     const header = createElement('header', 'header'); 
     const btnNewGame = createElement('button', 'btn-new-game', 'New Game');
@@ -18,11 +35,20 @@ function initApp() {
         // Main
     const main = createElement('main', 'main');
     const scoreBoard = createElement('div', 'scoreboard');
-    const movesCounter = createElement('span', 'counter-moves', 'Movies: 0');
-    const pairsCounter = createElement('span', 'counter-pairs', 'Pairs: 0 из 8');
-    const gameBoard = createElement('div', 'game-board');
-    main.append(scoreBoard, gameBoard);   
+    const movesCounter = createElement('span', 'counter-moves', 'Moves: 0');
+    const pairsCounter = createElement('span', 'counter-pairs', 'Pairs: 0 of 8');   
     scoreBoard.append(movesCounter, pairsCounter);
+    const gameBoard = createElement('div', 'game-board');
+    cardsData.forEach((icon) => {
+        const card = createElement('div', 'card');
+        const cardInner = createElement('div', 'card-inner');
+        const cardFront = createElement('div', 'card-front', icon);
+        const cardBack = createElement('div', 'card-back', '?');
+        cardInner.append((cardFront, cardBack));
+        card.append(cardInner);
+        gameBoard.append(card);
+    })
+    main.append(scoreBoard, gameBoard); 
         // Footer
     const footer = createElement('footer', 'footer');
 
