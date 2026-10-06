@@ -25,13 +25,75 @@ function prepareCards() {
     cardsData = shuffle(doubleCards);
 }
 
+let hasFlippedCard = false;
+let lockBoard = false;
+let firstCard = null;
+let secondCard = null;
+
+let moves = 0;
+let matchedPairs = 0;
+
+function flipCard() {
+    if (lockBoard) return;
+    if (this === firstCard) return;
+    this.classList.add('flipped');
+    if (!hasFlippedCard) {
+        hasFlippedCard = true;
+        firstCard = this;
+        return;
+    }
+    secondCard = this;
+    moves++;
+    updateScoreBoard();
+    checkForMatch();
+}
+
+function checkForMatch() {
+    const isMatch = firstCard.querySelector('.card-front').textContent === secondCard.querySelector('.card-front').textContent;
+    if (isMatch) {
+        disableCards();
+    } else {
+        unflipCards();
+    }
+}
+
+function disableCards() {
+    matchedPairs++;
+    updateScoreBoard();
+    firstCard.removeEventListener('click', flipCard);
+    secondCard.removeEventListener('click', flipCard);
+    resetBoard();
+}
+
+function unflipCards() {
+    lockBoard = true;
+    setTimeout(() => {
+        firstCard.classList.remove('flipped');
+        secondCard.classList.remove('flipped');
+        resetBoard();
+    }, 1000);
+}
+
+function updateScoreBoard() {
+    document.querySelector('.counter-moves').textContent = `Moves: ${moves}`;
+    document.querySelector('.counter-pairs').textContent = `Pairs: ${matchedPairs} of 8`;
+}
+
+function resetBoard() {
+    hasFlippedCard = false;
+    lockBoard = false;
+    firstCard = null;
+    secondCard = null;
+}
+
 function initApp() {
     prepareCards();
         // Header
     const header = createElement('header', 'header'); 
+    const title = createElement('h1', 'title', 'Memory Game')
     const btnNewGame = createElement('button', 'btn-new-game', 'New Game');
     const btnLeaderboard = createElement('button', 'btn-leaderboard', 'Leader Board');
-    header.append(btnNewGame, btnLeaderboard);
+    header.append(title, btnNewGame, btnLeaderboard);
         // Main
     const main = createElement('main', 'main');
     const scoreBoard = createElement('div', 'scoreboard');
@@ -44,8 +106,9 @@ function initApp() {
         const cardInner = createElement('div', 'card-inner');
         const cardFront = createElement('div', 'card-front', icon);
         const cardBack = createElement('div', 'card-back', '?');
-        cardInner.append((cardFront, cardBack));
+        cardInner.append(cardFront, cardBack);
         card.append(cardInner);
+        card.addEventListener('click', flipCard);
         gameBoard.append(card);
     })
     main.append(scoreBoard, gameBoard); 
