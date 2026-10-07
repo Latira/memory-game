@@ -32,6 +32,7 @@ let secondCard = null;
 
 let moves = 0;
 let matchedPairs = 0;
+let timeoutId = null;
 
 function flipCard() {
     if (lockBoard) return;
@@ -67,7 +68,7 @@ function disableCards() {
 
 function unflipCards() {
     lockBoard = true;
-    setTimeout(() => {
+    timeoutId = setTimeout(() => {
         firstCard.classList.remove('flipped');
         secondCard.classList.remove('flipped');
         resetBoard();
@@ -84,23 +85,12 @@ function resetBoard() {
     lockBoard = false;
     firstCard = null;
     secondCard = null;
+    timeoutId = null;
 }
 
-function initApp() {
+function createGrid(gameBoard) {
+    gameBoard.textContent = '';
     prepareCards();
-        // Header
-    const header = createElement('header', 'header'); 
-    const title = createElement('h1', 'title', 'Memory Game')
-    const btnNewGame = createElement('button', 'btn-new-game', 'New Game');
-    const btnLeaderboard = createElement('button', 'btn-leaderboard', 'Leader Board');
-    header.append(title, btnNewGame, btnLeaderboard);
-        // Main
-    const main = createElement('main', 'main');
-    const scoreBoard = createElement('div', 'scoreboard');
-    const movesCounter = createElement('span', 'counter-moves', 'Moves: 0');
-    const pairsCounter = createElement('span', 'counter-pairs', 'Pairs: 0 of 8');   
-    scoreBoard.append(movesCounter, pairsCounter);
-    const gameBoard = createElement('div', 'game-board');
     cardsData.forEach((icon) => {
         const card = createElement('div', 'card');
         const cardInner = createElement('div', 'card-inner');
@@ -111,6 +101,39 @@ function initApp() {
         card.addEventListener('click', flipCard);
         gameBoard.append(card);
     })
+}
+
+function restartGame() {
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+    moves = 0;
+    matchedPairs = 0;
+    resetBoard();
+    updateScoreBoard();
+    const gameBoard = document.querySelector('.game-board');
+    if (gameBoard) {
+        createGrid(gameBoard);
+    }
+    console.log('Игра успешно перезапущена без перезагрузки страницы!');
+}
+
+function initApp() {
+        // Header
+    const header = createElement('header', 'header'); 
+    const title = createElement('h1', 'title', 'Memory Game')
+    const btnNewGame = createElement('button', 'btn-new-game', 'New Game');
+    const btnLeaderboard = createElement('button', 'btn-leaderboard', 'Leader Board');
+    header.append(title, btnNewGame, btnLeaderboard);
+    btnNewGame.addEventListener('click', restartGame);
+        // Main
+    const main = createElement('main', 'main');
+    const scoreBoard = createElement('div', 'scoreboard');
+    const movesCounter = createElement('span', 'counter-moves', 'Moves: 0');
+    const pairsCounter = createElement('span', 'counter-pairs', 'Pairs: 0 of 8');   
+    scoreBoard.append(movesCounter, pairsCounter);
+    const gameBoard = createElement('div', 'game-board');
+    createGrid(gameBoard);
     main.append(scoreBoard, gameBoard); 
         // Footer
     const footer = createElement('footer', 'footer');
