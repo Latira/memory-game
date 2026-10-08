@@ -25,44 +25,39 @@ function prepareCards() {
     cardsData = shuffle(doubleCards);
 }
 
-let hasFlippedCard = false;
-let lockBoard = false;
-let firstCard = null;
-let secondCard = null;
+let firstActiveCard = null;
+let secondActiveCard = null;
+let timerActive = false;
 
 let moves = 0;
 let matchedPairs = 0;
 let timeoutId = null;
 
 function flipCard() {
-    if (lockBoard) return;
-    if (this === firstCard) return;
+    if (timerActive) return;
+    if (this === firstActiveCard) return;
     this.classList.add('flipped');
-    if (!hasFlippedCard) {
-        hasFlippedCard = true;
-        firstCard = this;
+    if (firstActiveCard === null) {
+        firstActiveCard = this;
         return;
+    } else {
+        secondActiveCard = this;
     }
-    secondCard = this;
     moves++;
     updateScoreBoard();
-    checkForMatch();
-}
-
-function checkForMatch() {
-    const isMatch = firstCard.querySelector('.card-front').textContent === secondCard.querySelector('.card-front').textContent;
+    const isMatch = firstActiveCard.querySelector('.card-front').textContent === secondActiveCard.querySelector('.card-front').textContent;
     if (isMatch) {
         disableCards();
     } else {
-        unflipCards();
+        closeCards();
     }
 }
 
 function disableCards() {
     matchedPairs++;
     updateScoreBoard();
-    firstCard.removeEventListener('click', flipCard);
-    secondCard.removeEventListener('click', flipCard);
+    firstActiveCard.removeEventListener('click', flipCard);
+    secondActiveCard.removeEventListener('click', flipCard);
     if (matchedPairs === 8) {
         setTimeout(() => {
             saveResult(moves);
@@ -72,11 +67,11 @@ function disableCards() {
     resetBoard();
 }
 
-function unflipCards() {
-    lockBoard = true;
+function closeCards() {
+    timerActive = true;
     timeoutId = setTimeout(() => {
-        firstCard.classList.remove('flipped');
-        secondCard.classList.remove('flipped');
+        firstActiveCard.classList.remove('flipped');
+        secondActiveCard.classList.remove('flipped');
         resetBoard();
     }, 1000);
 }
@@ -87,10 +82,9 @@ function updateScoreBoard() {
 }
 
 function resetBoard() {
-    hasFlippedCard = false;
-    lockBoard = false;
-    firstCard = null;
-    secondCard = null;
+    timerActive = false;
+    firstActiveCard = null;
+    secondActiveCard = null;
     timeoutId = null;
 }
 
@@ -239,7 +233,6 @@ function restartGame() {
     if (gameBoard) {
         createGrid(gameBoard);
     }
-    console.log('Игра успешно перезапущена без перезагрузки страницы!');
 }
 
 function initApp() {
@@ -262,6 +255,12 @@ function initApp() {
     main.append(scoreBoard, gameBoard); 
         // Footer
     const footer = createElement('footer', 'footer');
+    const githubLink = createElement('a', 'footer-link', 'Github Latira');
+    githubLink.href = 'https://github.com/Latira';
+    const footerYear = createElement('p', 'footer-year', '2026');
+    const rsLink = createElement('a', 'footer-link', 'Training app for RS School');
+    rsLink.href = 'https://rs.school/';
+    footer.append(githubLink, footerYear, rsLink);
 
     document.body.append(header, main, footer);
     createModals();
