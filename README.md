@@ -8,7 +8,7 @@ The game starts automatically as soon as the page loads, presenting a grid of si
 ## Local Setup
 1. Clone the repository to your local machine:
    ```bash
-   git clone https://github.com
+   git clone https://github.com/Latira/memory-game.git
    ```
 2. Navigate to the project folder:
    ```bash
