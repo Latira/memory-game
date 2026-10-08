@@ -5,7 +5,9 @@
     --primary-hover: #357abd;
     --card-back: #2c3e50;
     --card-front: #ffffff;
-    --grid-gap: 15px; 
+    --grid-gap: 15px;
+    --modal-overlay-bg: rgba(0, 0, 0, 0.6);
+    --modal-bg: #ffffff;
 }
 
 * {
@@ -139,6 +141,113 @@ body {
         background-color: var(--card-back);
         color: white;
         font-weight: bold;
+    }
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--modal-overlay-bg);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 100;
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+
+        .modal-content {
+            transform: scale(1);
+        }
+    }
+
+    .modal-content {
+        background-color: var(--modal-bg);
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transform: scale(0.8);
+        transition: transform 0.3s ease;
+        max-width: 90%;
+        width: 400px;
+    }
+
+    .modal-title {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+    }
+
+    .modal-stats {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 25px;
+        color: var(--text-color);
+    }
+
+    .modal-buttons-container {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        margin-bottom: 25px;
+        font-size: 16px;
+
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .current-run {
+            background-color: #f1f7fe;
+            font-weight: bold;
+        }
+    }
+
+    .modal-btn {
+        padding: 10px 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: var(--primary-color);
+        color: white;
+        transition: background-color 0.2s, transform 0.1s;
+
+        &:hover {
+            background-color: var(--primary-hover);
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
     }
 }
 

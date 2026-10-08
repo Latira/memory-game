@@ -63,6 +63,12 @@ function disableCards() {
     updateScoreBoard();
     firstCard.removeEventListener('click', flipCard);
     secondCard.removeEventListener('click', flipCard);
+    if (matchedPairs === 8) {
+        setTimeout(() => {
+            saveResult(moves);
+            showWinModal();
+        }, 500)
+    }
     resetBoard();
 }
 
@@ -103,6 +109,122 @@ function createGrid(gameBoard) {
     })
 }
 
+function createModal(id, titleText, closeCallBack) {
+    const overlay = createElement('div', 'modal-overlay');
+    overlay.id = id;
+    const content = createElement('div', 'modal-content');
+    const title = createElement('h2', 'modal-title', titleText);
+    content.append(title);
+    overlay.append(content);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            closeCallBack();
+        }
+    });
+    return { overlay, content};
+}
+
+function createModals() {
+        // Win Modal
+    const winModal = createModal('win-modal', 'Congratulations! 🎉', () => closeModal('win-modal'));
+    const winStats = createElement('p', 'modal-stats');
+    winStats.id = 'modal-stats-text';
+    const winBtnNewGame = createElement('button', 'modal-btn', 'Play Again');
+    winBtnNewGame.addEventListener('click', () => {
+        closeModal('win-modal');
+        restartGame();
+    });
+    const winBtnClose = createElement ('button', 'modal-btn', 'Close');
+    winBtnClose.addEventListener('click', () => closeModal('win-modal'));
+    const buttonsContainer = createElement('div', 'modal-buttons-container');
+    buttonsContainer.append(winBtnNewGame, winBtnClose);
+    winModal.content.append(winStats, buttonsContainer);
+        // Leader Modal
+    const leaderModal = createModal('leaderboard-modal', 'Top 10 Leaders', () => closeModal('leaderboard-modal'));
+    const tableContainer = createElement('div', 'table-container');
+    tableContainer.id = 'leaderboard-table-container';
+    const leaderBtnClose = createElement('button', 'modal-btn', 'Close');
+    leaderBtnClose.addEventListener('click', () => closeModal('leaderboard-modal'));
+    leaderModal.content.append(tableContainer, leaderBtnClose);
+
+    document.body.append(winModal.overlay, leaderModal.overlay);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal('win-modal');
+            closeModal('leaderboard-modal');
+        }
+    });
+}
+
+function showWinModal() {
+    const overlay = document.getElementById('win-modal');
+    const statsText = document.getElementById('modal-stats-text');
+    if (overlay && statsText) {
+        statsText.textContent = `You won the game in ${moves} moves!`;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function showLeaderboardModal() {
+    const overlay = document.getElementById('leaderboard-modal');
+    const container = document.getElementById('leaderboard-table-container');
+    if (!overlay || !container) return;
+    container.textContent = '';
+    const results = JSON.parse(localStorage.getItem('memoryGameResults')) || [];
+    if (results.length === 0) {
+        const noResultsMsg = createElement('p', 'modal-stats', 'No games played yet. Be the first!');
+        container.append(noResultsMsg);
+    } else {
+        const table = createElement('table', 'leaderboard-table');
+        const thead = createElement('thead');
+        const headerRow = createElement('tr');
+        headerRow.append(
+            createElement('th', null, 'Rank'),
+            createElement('th', null, 'Moves'),
+            createElement('th', null, 'Date'),
+        );
+        thead.append(headerRow);
+        const tbody = createElement('tbody');
+        results.forEach((res, index) => {
+            const row = createElement('tr');
+            row.append(
+                createElement('td', null, `#${index + 1}`),
+                createElement('td', null, `${res.moves} moves`),
+                createElement('td', null, res.date)
+            );
+            tbody.append(row);
+        });
+        table.append(thead, tbody);
+        container.append(table);
+    }
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    const overlay = document.getElementById(modalId);
+    if (overlay && overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+        const anyActive = document.querySelector('.modal-overlay.active');
+        if (!anyActive) {
+            document.body.style.overflow = '';
+        } 
+    }
+}
+
+function saveResult(currentMoves) {
+    let results = JSON.parse(localStorage.getItem('memoryGameResults')) || [];
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const formattedDate = `${day}.${month}.${year}`;
+    results.push({ moves: currentMoves, date: formattedDate });
+    results.sort((a,b) => a.moves - b.moves);
+    localStorage.setItem('memoryGameResults', JSON.stringify(results.slice(0, 10)));
+}
+
 function restartGame() {
     if (timeoutId) {
         clearTimeout(timeoutId);
@@ -111,6 +233,8 @@ function restartGame() {
     matchedPairs = 0;
     resetBoard();
     updateScoreBoard();
+    closeModal('win-modal');
+    closeModal('leaderboard-modal');
     const gameBoard = document.querySelector('.game-board');
     if (gameBoard) {
         createGrid(gameBoard);
@@ -126,6 +250,7 @@ function initApp() {
     const btnLeaderboard = createElement('button', 'btn-leaderboard', 'Leader Board');
     header.append(title, btnNewGame, btnLeaderboard);
     btnNewGame.addEventListener('click', restartGame);
+    btnLeaderboard.addEventListener('click', showLeaderboardModal);
         // Main
     const main = createElement('main', 'main');
     const scoreBoard = createElement('div', 'scoreboard');
@@ -139,6 +264,7 @@ function initApp() {
     const footer = createElement('footer', 'footer');
 
     document.body.append(header, main, footer);
+    createModals();
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
